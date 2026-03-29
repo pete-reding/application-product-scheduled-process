@@ -34,7 +34,7 @@ def get_conn(readonly: bool = False) -> duckdb.DuckDBPyConnection:
     """
     global _CONN  # noqa: PLW0603
     if _CONN is None:
-        md_path = f"md:my_db?motherduck_token={settings.motherduck_token}"
+        md_path = f"md:?motherduck_token={settings.motherduck_token}"
         logger.debug("Opening MotherDuck connection…")
         _CONN = duckdb.connect(md_path)
         logger.info("MotherDuck connection established.")

@@ -1,19 +1,19 @@
 -- ─────────────────────────────────────────────────────────────────────────────
 -- 002_create_tables.sql
--- All 7 pipeline infrastructure tables in product_normalization.
+-- All 7 pipeline infrastructure tables in my_db.product_normalization.
 -- Safe to run multiple times (CREATE TABLE IF NOT EXISTS).
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- 1. CDC watermark
-CREATE TABLE IF NOT EXISTS product_normalization.pipeline_watermark (
+CREATE TABLE IF NOT EXISTS my_db.product_normalization.pipeline_watermark (
     pipeline_name   VARCHAR     NOT NULL,
     watermark_ts    TIMESTAMPTZ NOT NULL,
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2. Append-only decision log
-CREATE TABLE IF NOT EXISTS product_normalization.normalization_decisions (
-    id              BIGINT      DEFAULT nextval('product_normalization.decisions_seq'),
+CREATE TABLE IF NOT EXISTS my_db.product_normalization.normalization_decisions (
+    id              BIGINT      DEFAULT nextval('my_db.product_normalization.decisions_seq'),
     feature_id      VARCHAR     NOT NULL,
     flow_published_at TIMESTAMPTZ,
     raw_product_name VARCHAR    NOT NULL,
@@ -29,8 +29,8 @@ CREATE TABLE IF NOT EXISTS product_normalization.normalization_decisions (
 );
 
 -- 3. Human review queue
-CREATE TABLE IF NOT EXISTS product_normalization.review_queue (
-    id              BIGINT      DEFAULT nextval('product_normalization.review_seq'),
+CREATE TABLE IF NOT EXISTS my_db.product_normalization.review_queue (
+    id              BIGINT      DEFAULT nextval('my_db.product_normalization.review_seq'),
     feature_id      VARCHAR     NOT NULL,
     flow_published_at TIMESTAMPTZ,
     raw_product_name VARCHAR    NOT NULL,
@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS product_normalization.review_queue (
 );
 
 -- 4. Abbreviation dictionary (seed data in 003_seed.sql)
-CREATE TABLE IF NOT EXISTS product_normalization.abbreviation_dictionary (
-    id          INTEGER DEFAULT nextval('product_normalization.abbrev_seq'),
+CREATE TABLE IF NOT EXISTS my_db.product_normalization.abbreviation_dictionary (
+    id          INTEGER DEFAULT nextval('my_db.product_normalization.abbrev_seq'),
     abbreviation VARCHAR NOT NULL,
     expansion    VARCHAR NOT NULL,
     notes        VARCHAR,
@@ -52,8 +52,8 @@ CREATE TABLE IF NOT EXISTS product_normalization.abbreviation_dictionary (
 );
 
 -- 5. Exact mapping table
-CREATE TABLE IF NOT EXISTS product_normalization.exact_mapping (
-    id              INTEGER DEFAULT nextval('product_normalization.exact_seq'),
+CREATE TABLE IF NOT EXISTS my_db.product_normalization.exact_mapping (
+    id              INTEGER DEFAULT nextval('my_db.product_normalization.exact_seq'),
     raw_text        VARCHAR NOT NULL UNIQUE,
     product_id      VARCHAR,
     normalized_name VARCHAR NOT NULL,
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS product_normalization.exact_mapping (
 );
 
 -- 6. Custom regex rules
-CREATE TABLE IF NOT EXISTS product_normalization.custom_rules (
-    id              INTEGER DEFAULT nextval('product_normalization.rules_seq'),
+CREATE TABLE IF NOT EXISTS my_db.product_normalization.custom_rules (
+    id              INTEGER DEFAULT nextval('my_db.product_normalization.rules_seq'),
     pattern         VARCHAR NOT NULL,           -- Python regex
     normalized_name VARCHAR NOT NULL,
     product_id      VARCHAR,
@@ -76,8 +76,8 @@ CREATE TABLE IF NOT EXISTS product_normalization.custom_rules (
 );
 
 -- 7. Pipeline run log
-CREATE TABLE IF NOT EXISTS product_normalization.run_log (
-    id                  BIGINT  DEFAULT nextval('product_normalization.runlog_seq'),
+CREATE TABLE IF NOT EXISTS my_db.product_normalization.run_log (
+    id                  BIGINT  DEFAULT nextval('my_db.product_normalization.runlog_seq'),
     run_id              VARCHAR NOT NULL,
     watermark_start     TIMESTAMPTZ,
     watermark_end       TIMESTAMPTZ,

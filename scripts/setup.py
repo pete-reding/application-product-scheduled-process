@@ -61,7 +61,7 @@ def verify_connectivity(conn) -> bool:
         ("MotherDuck version",   "SELECT version()"),
         ("agmri source read",    "SELECT COUNT(*) FROM agmri.agmri.base_feature LIMIT 1"),
         ("catalog read",         "SELECT COUNT(*) FROM product_normalization_table.main.product_catalog LIMIT 1"),
-        ("my_db write probe",    "CREATE SCHEMA IF NOT EXISTS product_normalization"),
+        ("my_db write probe",    "CREATE SCHEMA IF NOT EXISTS my_db.product_normalization"),
     ]
 
     all_ok = True
@@ -82,19 +82,19 @@ def verify_connectivity(conn) -> bool:
 def drop_all(conn) -> None:
     """Drop all pipeline tables and sequences (--force mode)."""
     objects = [
-        "TABLE  product_normalization.normalization_decisions",
-        "TABLE  product_normalization.review_queue",
-        "TABLE  product_normalization.abbreviation_dictionary",
-        "TABLE  product_normalization.exact_mapping",
-        "TABLE  product_normalization.custom_rules",
-        "TABLE  product_normalization.run_log",
-        "TABLE  product_normalization.pipeline_watermark",
-        "SEQUENCE product_normalization.decisions_seq",
-        "SEQUENCE product_normalization.review_seq",
-        "SEQUENCE product_normalization.abbrev_seq",
-        "SEQUENCE product_normalization.exact_seq",
-        "SEQUENCE product_normalization.rules_seq",
-        "SEQUENCE product_normalization.runlog_seq",
+        "TABLE  my_db.product_normalization.normalization_decisions",
+        "TABLE  my_db.product_normalization.review_queue",
+        "TABLE  my_db.product_normalization.abbreviation_dictionary",
+        "TABLE  my_db.product_normalization.exact_mapping",
+        "TABLE  my_db.product_normalization.custom_rules",
+        "TABLE  my_db.product_normalization.run_log",
+        "TABLE  my_db.product_normalization.pipeline_watermark",
+        "SEQUENCE my_db.product_normalization.decisions_seq",
+        "SEQUENCE my_db.product_normalization.review_seq",
+        "SEQUENCE my_db.product_normalization.abbrev_seq",
+        "SEQUENCE my_db.product_normalization.exact_seq",
+        "SEQUENCE my_db.product_normalization.rules_seq",
+        "SEQUENCE my_db.product_normalization.runlog_seq",
     ]
     for obj in objects:
         try:
@@ -208,7 +208,7 @@ def main(argv: list[str] | None = None) -> int:
     for tbl in expected_tables:
         try:
             result = conn.execute(
-                f"SELECT COUNT(*) FROM product_normalization.{tbl}"
+                f"SELECT COUNT(*) FROM my_db.product_normalization.{tbl}"
             ).fetchone()
             count = result[0] if result else 0
             console.print(f"  [green]✓[/green]  {tbl:<35} ({count} rows)")
