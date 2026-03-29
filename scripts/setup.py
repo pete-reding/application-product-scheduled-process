@@ -61,9 +61,7 @@ def verify_connectivity(conn) -> bool:
         ("MotherDuck version",   "SELECT version()"),
         ("agmri source read",    "SELECT COUNT(*) FROM agmri.agmri.base_feature LIMIT 1"),
         ("catalog read",         "SELECT COUNT(*) FROM product_normalization_table.main.product_catalog LIMIT 1"),
-        ("my_db write probe",    (
-            "CREATE SCHEMA IF NOT EXISTS IntelinairAnalyzeDB.product_normalization"
-        )),
+        ("my_db write probe",    "USE IntelinairAnalyzeDB"),
     ]
 
     all_ok = True
@@ -84,19 +82,19 @@ def verify_connectivity(conn) -> bool:
 def drop_all(conn) -> None:
     """Drop all pipeline tables and sequences (--force mode)."""
     objects = [
-        "TABLE  IntelinairAnalyzeDB.product_normalization.normalization_decisions",
-        "TABLE  IntelinairAnalyzeDB.product_normalization.review_queue",
-        "TABLE  IntelinairAnalyzeDB.product_normalization.abbreviation_dictionary",
-        "TABLE  IntelinairAnalyzeDB.product_normalization.exact_mapping",
-        "TABLE  IntelinairAnalyzeDB.product_normalization.custom_rules",
-        "TABLE  IntelinairAnalyzeDB.product_normalization.run_log",
-        "TABLE  IntelinairAnalyzeDB.product_normalization.pipeline_watermark",
-        "SEQUENCE IntelinairAnalyzeDB.product_normalization.decisions_seq",
-        "SEQUENCE IntelinairAnalyzeDB.product_normalization.review_seq",
-        "SEQUENCE IntelinairAnalyzeDB.product_normalization.abbrev_seq",
-        "SEQUENCE IntelinairAnalyzeDB.product_normalization.exact_seq",
-        "SEQUENCE IntelinairAnalyzeDB.product_normalization.rules_seq",
-        "SEQUENCE IntelinairAnalyzeDB.product_normalization.runlog_seq",
+        "TABLE  product_normalization.normalization_decisions",
+        "TABLE  product_normalization.review_queue",
+        "TABLE  product_normalization.abbreviation_dictionary",
+        "TABLE  product_normalization.exact_mapping",
+        "TABLE  product_normalization.custom_rules",
+        "TABLE  product_normalization.run_log",
+        "TABLE  product_normalization.pipeline_watermark",
+        "SEQUENCE product_normalization.decisions_seq",
+        "SEQUENCE product_normalization.review_seq",
+        "SEQUENCE product_normalization.abbrev_seq",
+        "SEQUENCE product_normalization.exact_seq",
+        "SEQUENCE product_normalization.rules_seq",
+        "SEQUENCE product_normalization.runlog_seq",
     ]
     for obj in objects:
         try:
@@ -110,6 +108,11 @@ def run_sql_file(conn, filename: str) -> bool:
     """Execute all statements in a SQL file. Returns True on success."""
     sql = _load_sql(filename)
     statements = [s.strip() for s in sql.split(";") if s.strip()]
+    # Ensure database context is set before each file
+    try:
+        conn.execute("USE IntelinairAnalyzeDB")
+    except Exception:
+        pass
     ok = True
     for stmt in statements:
         try:
@@ -210,7 +213,7 @@ def main(argv: list[str] | None = None) -> int:
     for tbl in expected_tables:
         try:
             result = conn.execute(
-                f"SELECT COUNT(*) FROM IntelinairAnalyzeDB.product_normalization.{tbl}"
+                f"SELECT COUNT(*) FROM product_normalization.{tbl}"
             ).fetchone()
             count = result[0] if result else 0
             console.print(f"  [green]✓[/green]  {tbl:<35} ({count} rows)")

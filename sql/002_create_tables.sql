@@ -1,23 +1,22 @@
--- ─────────────────────────────────────────────────────────────────────────────
 -- 002_create_tables.sql
--- All 7 pipeline infrastructure tables in IntelinairAnalyzeDB.product_normalization.
--- Safe to run multiple times (CREATE TABLE IF NOT EXISTS).
--- ─────────────────────────────────────────────────────────────────────────────
+-- USE context set so all names are unqualified (DuckDB rejects catalog
+-- prefix inside CREATE TABLE column definitions e.g. in nextval()).
+USE IntelinairAnalyzeDB;
 
 -- 1. CDC watermark
-CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.pipeline_watermark (
+CREATE TABLE IF NOT EXISTS product_normalization.pipeline_watermark (
     pipeline_name   VARCHAR     NOT NULL,
     watermark_ts    TIMESTAMPTZ NOT NULL,
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 2. Append-only decision log
-CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.normalization_decisions (
-    id              BIGINT      DEFAULT nextval('IntelinairAnalyzeDB.product_normalization.decisions_seq'),
+CREATE TABLE IF NOT EXISTS product_normalization.normalization_decisions (
+    id              BIGINT      DEFAULT nextval('product_normalization.decisions_seq'),
     feature_id      VARCHAR     NOT NULL,
     flow_published_at TIMESTAMPTZ,
     raw_product_name VARCHAR    NOT NULL,
-    match_method    VARCHAR     NOT NULL,   -- junk | exact_map | catalog_exact | …
+    match_method    VARCHAR     NOT NULL,
     normalized_name VARCHAR,
     product_id      VARCHAR,
     category        VARCHAR,
@@ -29,8 +28,8 @@ CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.normalizati
 );
 
 -- 3. Human review queue
-CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.review_queue (
-    id              BIGINT      DEFAULT nextval('IntelinairAnalyzeDB.product_normalization.review_seq'),
+CREATE TABLE IF NOT EXISTS product_normalization.review_queue (
+    id              BIGINT      DEFAULT nextval('product_normalization.review_seq'),
     feature_id      VARCHAR     NOT NULL,
     flow_published_at TIMESTAMPTZ,
     raw_product_name VARCHAR    NOT NULL,
@@ -42,9 +41,9 @@ CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.review_queu
     resolution_note VARCHAR
 );
 
--- 4. Abbreviation dictionary (seed data in 003_seed.sql)
-CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.abbreviation_dictionary (
-    id          INTEGER DEFAULT nextval('IntelinairAnalyzeDB.product_normalization.abbrev_seq'),
+-- 4. Abbreviation dictionary
+CREATE TABLE IF NOT EXISTS product_normalization.abbreviation_dictionary (
+    id           INTEGER DEFAULT nextval('product_normalization.abbrev_seq'),
     abbreviation VARCHAR NOT NULL,
     expansion    VARCHAR NOT NULL,
     notes        VARCHAR,
@@ -52,9 +51,9 @@ CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.abbreviatio
 );
 
 -- 5. Exact mapping table
-CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.exact_mapping (
-    id              INTEGER DEFAULT nextval('IntelinairAnalyzeDB.product_normalization.exact_seq'),
-    raw_text        VARCHAR NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS product_normalization.exact_mapping (
+    id              INTEGER DEFAULT nextval('product_normalization.exact_seq'),
+    raw_text        VARCHAR NOT NULL,
     product_id      VARCHAR,
     normalized_name VARCHAR NOT NULL,
     category        VARCHAR,
@@ -63,9 +62,9 @@ CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.exact_mappi
 );
 
 -- 6. Custom regex rules
-CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.custom_rules (
-    id              INTEGER DEFAULT nextval('IntelinairAnalyzeDB.product_normalization.rules_seq'),
-    pattern         VARCHAR NOT NULL,           -- Python regex
+CREATE TABLE IF NOT EXISTS product_normalization.custom_rules (
+    id              INTEGER DEFAULT nextval('product_normalization.rules_seq'),
+    pattern         VARCHAR NOT NULL,
     normalized_name VARCHAR NOT NULL,
     product_id      VARCHAR,
     category        VARCHAR,
@@ -76,8 +75,8 @@ CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.custom_rule
 );
 
 -- 7. Pipeline run log
-CREATE TABLE IF NOT EXISTS IntelinairAnalyzeDB.product_normalization.run_log (
-    id                  BIGINT  DEFAULT nextval('IntelinairAnalyzeDB.product_normalization.runlog_seq'),
+CREATE TABLE IF NOT EXISTS product_normalization.run_log (
+    id                  BIGINT  DEFAULT nextval('product_normalization.runlog_seq'),
     run_id              VARCHAR NOT NULL,
     watermark_start     TIMESTAMPTZ,
     watermark_end       TIMESTAMPTZ,
