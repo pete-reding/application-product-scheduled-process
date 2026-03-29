@@ -13,8 +13,7 @@ authors = [{ name = "Pete Reding" }]
 keywords = ["agriculture", "data-pipeline", "normalization", "motherduck", "duckdb"]
 
 dependencies = [
-    "duckdb>=0.10.0",
-    "motherduck>=0.10.0",
+    "duckdb>=1.1.0",
     "pandas>=2.0.0",
     "rapidfuzz>=3.0.0",
     "python-dotenv>=1.0.0",
