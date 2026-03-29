@@ -81,27 +81,41 @@ def verify_connectivity(conn) -> bool:
 
 def drop_all(conn) -> None:
     """Drop all pipeline tables and sequences (--force mode)."""
-    objects = [
-        "TABLE  product_normalization.normalization_decisions",
-        "TABLE  product_normalization.review_queue",
-        "TABLE  product_normalization.abbreviation_dictionary",
-        "TABLE  product_normalization.exact_mapping",
-        "TABLE  product_normalization.custom_rules",
-        "TABLE  product_normalization.run_log",
-        "TABLE  product_normalization.pipeline_watermark",
-        "SEQUENCE product_normalization.decisions_seq",
-        "SEQUENCE product_normalization.review_seq",
-        "SEQUENCE product_normalization.abbrev_seq",
-        "SEQUENCE product_normalization.exact_seq",
-        "SEQUENCE product_normalization.rules_seq",
-        "SEQUENCE product_normalization.runlog_seq",
+    # DuckDB syntax: DROP TABLE IF EXISTS <name>  (IF EXISTS before the name)
+    try:
+        conn.execute("USE IntelinairAnalyzeDB")
+    except Exception:
+        pass
+
+    tables = [
+        "product_normalization.normalization_decisions",
+        "product_normalization.review_queue",
+        "product_normalization.abbreviation_dictionary",
+        "product_normalization.exact_mapping",
+        "product_normalization.custom_rules",
+        "product_normalization.run_log",
+        "product_normalization.pipeline_watermark",
     ]
-    for obj in objects:
+    sequences = [
+        "product_normalization.decisions_seq",
+        "product_normalization.review_seq",
+        "product_normalization.abbrev_seq",
+        "product_normalization.exact_seq",
+        "product_normalization.rules_seq",
+        "product_normalization.runlog_seq",
+    ]
+    for tbl in tables:
         try:
-            conn.execute(f"DROP {obj} IF EXISTS")
-            console.print(f"  [yellow]dropped[/yellow]  {obj.split()[-1]}")
+            conn.execute(f"DROP TABLE IF EXISTS {tbl}")
+            console.print(f"  [yellow]dropped[/yellow]  {tbl.split('.')[-1]}")
         except Exception as exc:  # noqa: BLE001
-            console.print(f"  [red]error[/red]    {obj.split()[-1]} — {exc}")
+            console.print(f"  [red]error[/red]    {tbl.split('.')[-1]} — {exc}")
+    for seq in sequences:
+        try:
+            conn.execute(f"DROP SEQUENCE IF EXISTS {seq}")
+            console.print(f"  [yellow]dropped[/yellow]  {seq.split('.')[-1]}")
+        except Exception as exc:  # noqa: BLE001
+            console.print(f"  [red]error[/red]    {seq.split('.')[-1]} — {exc}")
 
 
 def run_sql_file(conn, filename: str) -> bool:
