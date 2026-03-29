@@ -1,0 +1,54 @@
+# ── Environment & secrets ───────────────────
+.env
+.env.*
+!.env.example
+
+# ── Python ───────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+.venv/
+venv/
+env/
+*.egg
+
+# ── Testing & coverage ───────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Type checking ────────────────────────────
+.mypy_cache/
+
+# ── Linting ──────────────────────────────────
+.ruff_cache/
+
+# ── macOS ────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── Logs & output ────────────────────────────
+logs/
+*.log
+output/
+exports/
+
+# ── IDE ──────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── DuckDB local files ───────────────────────
+*.duckdb
+*.duckdb.wal
+
+# ── Generated review UI ──────────────────────
+review_*.html

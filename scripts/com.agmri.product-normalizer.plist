@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  com.agmri.product-normalizer.plist
+  ───────────────────────────────────
+  macOS launchd agent that runs the product normalization pipeline daily.
+
+  INSTALL
+  -------
+  1. Edit the paths below to match your machine:
+       - <PROJECT_DIR>  →  absolute path to repo root
+       - <USER>         →  your macOS username  (echo $USER)
+
+  2. Copy to LaunchAgents:
+       cp scripts/com.agmri.product-normalizer.plist \
+          ~/Library/LaunchAgents/com.agmri.product-normalizer.plist
+
+  3. Load the agent:
+       launchctl load ~/Library/LaunchAgents/com.agmri.product-normalizer.plist
+
+  4. Verify it loaded:
+       launchctl list | grep agmri
+
+  UNINSTALL
+  ---------
+       launchctl unload ~/Library/LaunchAgents/com.agmri.product-normalizer.plist
+       rm ~/Library/LaunchAgents/com.agmri.product-normalizer.plist
+
+  MANUAL TRIGGER
+  --------------
+       launchctl start com.agmri.product-normalizer
+
+  LOGS
+  ----
+  stdout → <PROJECT_DIR>/logs/launchd_stdout.log
+  stderr → <PROJECT_DIR>/logs/launchd_stderr.log
+-->
+<plist version="1.0">
+<dict>
+
+    <!-- ── Identity ──────────────────────────────────────────────── -->
+    <key>Label</key>
+    <string>com.agmri.product-normalizer</string>
+
+    <!-- ── Command ───────────────────────────────────────────────── -->
+    <!--
+      Replace /Users/<USER>/<PROJECT_DIR> with your actual path.
+      Using the venv python ensures the correct package is found.
+    -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/<USER>/<PROJECT_DIR>/.venv/bin/python</string>
+        <string>-m</string>
+        <string>product_normalizer.cli</string>
+        <string>run</string>
+    </array>
+
+    <!-- ── Working directory ─────────────────────────────────────── -->
+    <key>WorkingDirectory</key>
+    <string>/Users/<USER>/<PROJECT_DIR></string>
+
+    <!-- ── Environment ───────────────────────────────────────────── -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+        <!-- .env file is loaded by pydantic-settings at runtime -->
+    </dict>
+
+    <!-- ── Schedule: daily at 06:00 local time ───────────────────── -->
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>6</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <!-- ── Logs ──────────────────────────────────────────────────── -->
+    <key>StandardOutPath</key>
+    <string>/Users/<USER>/<PROJECT_DIR>/logs/launchd_stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/<USER>/<PROJECT_DIR>/logs/launchd_stderr.log</string>
+
+    <!-- ── Behaviour ─────────────────────────────────────────────── -->
+    <!-- Run missed schedules on next login (e.g. laptop was asleep) -->
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StartInterval</key>
+    <!-- Fallback: also run every 86400s = 24h if calendar trigger misfires -->
+    <!-- Comment out if you only want the calendar trigger                  -->
+    <!-- <integer>86400</integer>                                           -->
+
+    <!-- Keep the job alive on failure (launchd will retry after 10s) -->
+    <key>KeepAlive</key>
+    <dict>
+        <key>Crashed</key>
+        <true/>
+    </dict>
+
+    <!-- Throttle rapid restarts to avoid runaway loops -->
+    <key>ThrottleInterval</key>
+    <integer>300</integer>
+
+</dict>
+</plist>
