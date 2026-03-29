@@ -20,7 +20,8 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Project root (two levels up from this file: src/product_normalizer/ → project root)
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+# parents[0]=product_normalizer  parents[1]=src  parents[2]=project root
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
