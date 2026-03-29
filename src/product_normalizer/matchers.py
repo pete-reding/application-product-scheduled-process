@@ -96,7 +96,7 @@ def _load_reference_data() -> None:
 
     _catalog = query(
         f"""
-        SELECT product_id, product_name, category, npk_analysis
+        SELECT product_id, normalized_product_name AS product_name, category, npk AS npk_analysis
         FROM   {settings.catalog_table}
         """
     )

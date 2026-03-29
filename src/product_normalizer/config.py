@@ -91,7 +91,7 @@ class Settings(BaseSettings):
 
     @cached_property
     def catalog_table(self) -> str:
-        return f"{self.CATALOG}.main.products"
+        return f"{self.CATALOG}.main.product_catalog"
 
     @cached_property
     def watermark_table(self) -> str:

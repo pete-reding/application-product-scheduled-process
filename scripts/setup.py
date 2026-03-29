@@ -60,11 +60,8 @@ def verify_connectivity(conn) -> bool:
     checks = [
         ("MotherDuck version",   "SELECT version()"),
         ("agmri source read",    "SELECT COUNT(*) FROM agmri.agmri.base_feature LIMIT 1"),
-        ("catalog read",         "SELECT COUNT(*) FROM product_normalization_table.main.products LIMIT 1"),
-        ("my_db write probe",    (
-            "CREATE TABLE IF NOT EXISTS my_db.__write_probe (x INT); "
-            "DROP TABLE IF EXISTS my_db.__write_probe"
-        )),
+        ("catalog read",         "SELECT COUNT(*) FROM product_normalization_table.main.product_catalog LIMIT 1"),
+        ("my_db write probe",    "CREATE SCHEMA IF NOT EXISTS my_db.product_normalization"),
     ]
 
     all_ok = True
