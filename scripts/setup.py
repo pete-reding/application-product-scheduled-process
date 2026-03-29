@@ -62,8 +62,7 @@ def verify_connectivity(conn) -> bool:
         ("agmri source read",    "SELECT COUNT(*) FROM agmri.agmri.base_feature LIMIT 1"),
         ("catalog read",         "SELECT COUNT(*) FROM product_normalization_table.main.product_catalog LIMIT 1"),
         ("my_db write probe",    (
-            "USE my_db; "
-            "CREATE SCHEMA IF NOT EXISTS product_normalization"
+            "CREATE SCHEMA IF NOT EXISTS IntelinairAnalyzeDB.product_normalization"
         )),
     ]
 
@@ -85,19 +84,19 @@ def verify_connectivity(conn) -> bool:
 def drop_all(conn) -> None:
     """Drop all pipeline tables and sequences (--force mode)."""
     objects = [
-        "TABLE  my_db.product_normalization.normalization_decisions",
-        "TABLE  my_db.product_normalization.review_queue",
-        "TABLE  my_db.product_normalization.abbreviation_dictionary",
-        "TABLE  my_db.product_normalization.exact_mapping",
-        "TABLE  my_db.product_normalization.custom_rules",
-        "TABLE  my_db.product_normalization.run_log",
-        "TABLE  my_db.product_normalization.pipeline_watermark",
-        "SEQUENCE my_db.product_normalization.decisions_seq",
-        "SEQUENCE my_db.product_normalization.review_seq",
-        "SEQUENCE my_db.product_normalization.abbrev_seq",
-        "SEQUENCE my_db.product_normalization.exact_seq",
-        "SEQUENCE my_db.product_normalization.rules_seq",
-        "SEQUENCE my_db.product_normalization.runlog_seq",
+        "TABLE  IntelinairAnalyzeDB.product_normalization.normalization_decisions",
+        "TABLE  IntelinairAnalyzeDB.product_normalization.review_queue",
+        "TABLE  IntelinairAnalyzeDB.product_normalization.abbreviation_dictionary",
+        "TABLE  IntelinairAnalyzeDB.product_normalization.exact_mapping",
+        "TABLE  IntelinairAnalyzeDB.product_normalization.custom_rules",
+        "TABLE  IntelinairAnalyzeDB.product_normalization.run_log",
+        "TABLE  IntelinairAnalyzeDB.product_normalization.pipeline_watermark",
+        "SEQUENCE IntelinairAnalyzeDB.product_normalization.decisions_seq",
+        "SEQUENCE IntelinairAnalyzeDB.product_normalization.review_seq",
+        "SEQUENCE IntelinairAnalyzeDB.product_normalization.abbrev_seq",
+        "SEQUENCE IntelinairAnalyzeDB.product_normalization.exact_seq",
+        "SEQUENCE IntelinairAnalyzeDB.product_normalization.rules_seq",
+        "SEQUENCE IntelinairAnalyzeDB.product_normalization.runlog_seq",
     ]
     for obj in objects:
         try:
@@ -211,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     for tbl in expected_tables:
         try:
             result = conn.execute(
-                f"SELECT COUNT(*) FROM my_db.product_normalization.{tbl}"
+                f"SELECT COUNT(*) FROM IntelinairAnalyzeDB.product_normalization.{tbl}"
             ).fetchone()
             count = result[0] if result else 0
             console.print(f"  [green]✓[/green]  {tbl:<35} ({count} rows)")

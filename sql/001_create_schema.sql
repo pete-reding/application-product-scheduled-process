@@ -4,4 +4,4 @@
 -- Run once during initial setup.
 -- ─────────────────────────────────────────────────────────────────────────────
 
-CREATE SCHEMA IF NOT EXISTS my_db.product_normalization;
+CREATE SCHEMA IF NOT EXISTS IntelinairAnalyzeDB.product_normalization;

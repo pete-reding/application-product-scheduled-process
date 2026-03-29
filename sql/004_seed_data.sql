@@ -7,7 +7,7 @@
 -- ── Abbreviation dictionary ───────────────────────────────────────────────────
 -- Common ag-industry abbreviations found in machine application records.
 
-INSERT INTO my_db.product_normalization.abbreviation_dictionary
+INSERT INTO IntelinairAnalyzeDB.product_normalization.abbreviation_dictionary
     (abbreviation, expansion, notes)
 VALUES
     -- Herbicides
@@ -121,7 +121,7 @@ VALUES
 -- ── Exact mapping ─────────────────────────────────────────────────────────────
 -- Known free-text strings that map deterministically to a canonical name.
 
-INSERT INTO my_db.product_normalization.exact_mapping
+INSERT INTO IntelinairAnalyzeDB.product_normalization.exact_mapping
     (raw_text, normalized_name, category, notes)
 VALUES
     ('roundup',             'Roundup PowerMAX',     'herbicide',  'lowercase brand'),
@@ -208,7 +208,7 @@ VALUES
 -- ── Custom rules ──────────────────────────────────────────────────────────────
 -- Regex patterns evaluated after abbreviation expansion and NPK detection.
 
-INSERT INTO my_db.product_normalization.custom_rules
+INSERT INTO IntelinairAnalyzeDB.product_normalization.custom_rules
     (pattern, normalized_name, category, priority, notes)
 VALUES
     -- Rate-embedded strings  e.g. "Roundup 22oz", "Atrazine 1qt"

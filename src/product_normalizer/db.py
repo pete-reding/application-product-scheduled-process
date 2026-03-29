@@ -37,11 +37,7 @@ def get_conn(readonly: bool = False) -> duckdb.DuckDBPyConnection:
         md_path = f"md:?motherduck_token={settings.motherduck_token}"
         logger.debug("Opening MotherDuck connection…")
         _CONN = duckdb.connect(md_path)
-        # Attach and set default database to my_db so cross-db refs resolve
-        try:
-            _CONN.execute("USE my_db")
-        except Exception:
-            pass  # my_db may already be the default or context set by token
+
         logger.info("MotherDuck connection established.")
     return _CONN
 

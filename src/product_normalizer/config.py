@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     catalog_db: str = Field(
         "product_normalization_table", description="Read-only product catalog share"
     )
-    write_db: str = Field("my_db", description="Writable output database")
+    write_db: str = Field("IntelinairAnalyzeDB", description="Writable output database")
     pipeline_schema: str = Field(
         "product_normalization", description="Schema inside write_db for pipeline tables"
     )
