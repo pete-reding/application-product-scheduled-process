@@ -81,8 +81,10 @@ class Settings(BaseSettings):
 
     @cached_property
     def W(self) -> str:  # noqa: N802
-        """Writable schema prefix: <write_db>.<pipeline_schema>"""
-        return f"{self.write_db}.{self.pipeline_schema}"
+        """Writable schema prefix.
+        Connection is md:my_db so only schema name is needed (no db prefix).
+        """
+        return self.pipeline_schema
 
     # ── Table FQNs ────────────────────────────────────────────────────
     @cached_property
