@@ -1,10 +1,28 @@
-# Agricultural Product Name Normalizer
+# application-product-scheduled-process
+
+> **Ownership status:** Currently hosted at `pete-reding/application-product-scheduled-process`, pending transfer to the Intelinair GitHub organisation alongside [`customer-reporting-automation`](https://github.com/pete-reding/reporting-service-v2). Interim access is granted via GitHub collaborator invites to the Intelinair engineering team.
 
 A daily automated pipeline that normalizes free-text agricultural product names captured by sprayer applicator machines into a validated, classified product catalog.
 
 Farmers operating sprayer equipment enter product names as free text, resulting in misspellings, abbreviations, rate-embedded strings, multi-product tank mix entries, NPK ratio variants, and junk entries. This pipeline extracts, normalizes, and classifies those entries against a known product catalog — identifying product name, brand, category (herbicide, fertilizer, fungicide, insecticide, biological, adjuvant, etc.), and NPK analysis where applicable.
 
----
+## Status
+
+| Aspect | Value |
+|---|---|
+| **Lifecycle** | Active — daily production schedule |
+| **Primary maintainer** | Peter Reding |
+| **Schedule** | Daily at 06:00 via macOS launchd |
+| **Data layer** | MotherDuck (`agmri` read-only share + `my_db` writable) |
+| **Supersedes** | [`product_matching_service`](https://github.com/pete-reding/product_matching_service) (earlier prototype) |
+
+## Role in the Broader System
+
+| Repo | Relationship |
+|---|---|
+| [`product_matching_service`](https://github.com/pete-reding/product_matching_service) | Prototype predecessor — established the graph model, this repo supersedes it with a full 9-step matching cascade |
+| [`customer-reporting-automation`](https://github.com/pete-reding/reporting-service-v2) | Downstream consumer — the normalized product catalog in `my_db.product_normalization` feeds application/product reports |
+| [`2026-motherduck-queries`](https://github.com/pete-reding/2026-motherduck-queries) | Sibling — shares the MotherDuck writable-database pattern (`my_db` for staging) |
 
 ## Architecture
 
@@ -23,7 +41,7 @@ agmri.agmri.base_feature  (read-only MotherDuck share)
   │  2. Exact mapping table          │
   │  3. Catalog exact match          │
   │  4. Abbreviation dictionary      │
-  │  5. NPK regex  (e.g. 28-0-0)    │
+  │  5. NPK regex  (e.g. 28-0-0)     │
   │  6. 2,4-D variant detection      │
   │  7. Custom regex rules           │
   │  8. Fuzzy token overlap          │
@@ -49,8 +67,6 @@ agmri.agmri.base_feature  (read-only MotherDuck share)
 | `my_db` | **writable** | All pipeline outputs |
 
 This split is encoded centrally in `src/product_normalizer/config.py` as `settings.AGMRI`, `settings.CATALOG`, and `settings.W`.
-
----
 
 ## Project Structure
 
@@ -80,15 +96,13 @@ This split is encoded centrally in `src/product_normalizer/config.py` as `settin
 │   ├── 003_create_sequences.sql
 │   └── 004_seed_data.sql
 ├── scripts/
-│   ├── setup.py                          # Infrastructure setup
-│   └── com.agmri.product-normalizer.plist  # macOS launchd agent
+│   ├── setup.py                             # Infrastructure setup
+│   └── com.agmri.product-normalizer.plist   # macOS launchd agent
 ├── .env.example
 ├── .gitignore
 ├── pyproject.toml
 └── README.md
 ```
-
----
 
 ## Prerequisites
 
@@ -98,8 +112,6 @@ This split is encoded centrally in `src/product_normalizer/config.py` as `settin
   - `agmri` share (read)
   - `product_normalization_table` share (read)
   - `my_db` (write)
-
----
 
 ## Installation
 
@@ -120,8 +132,6 @@ cp .env.example .env
 # Edit .env and set MOTHERDUCK_TOKEN (and other values)
 ```
 
----
-
 ## Initial Setup
 
 Run the setup script once to create all infrastructure tables in MotherDuck:
@@ -136,8 +146,6 @@ python scripts/setup.py
 # Force recreate (drops all pipeline tables first — destructive)
 python scripts/setup.py --force
 ```
-
----
 
 ## Usage
 
@@ -172,8 +180,6 @@ normalize review
 normalize seed
 ```
 
----
-
 ## Scheduling (macOS launchd)
 
 The pipeline is designed to run daily at 06:00 via macOS launchd.
@@ -197,11 +203,10 @@ launchctl start com.agmri.product-normalizer
 ```
 
 Logs are written to:
+
 - `logs/launchd_stdout.log`
 - `logs/launchd_stderr.log`
 - `logs/pipeline.log`
-
----
 
 ## 9-Step Matching Cascade
 
@@ -212,12 +217,10 @@ Logs are written to:
 | 3 | Catalog exact | Case-insensitive match against the product catalog |
 | 4 | Abbreviation | Expands industry abbreviations (RU → Roundup) then re-matches catalog |
 | 5 | NPK regex | Detects fertilizer ratio strings (28-0-0, 18-46-0, etc.) |
-| 6 | 2,4-D variants | Normalises 2,4D / 24D / 2-4-D / 2 4 D → canonical form |
+| 6 | 2,4-D variants | Normalises `2,4D` / `24D` / `2-4-D` / `2 4 D` → canonical form |
 | 7 | Custom rules | Regex-based rules stored in DB (rate-embedded strings, etc.) |
 | 8 | Fuzzy | RapidFuzz `token_set_ratio` ≥ threshold (default: 72) |
 | 9 | No match | Entry queued for human review via browser UI |
-
----
 
 ## Review Workflow
 
@@ -228,8 +231,6 @@ When the pipeline finds entries it cannot resolve, it:
 3. Sends a macOS notification with a link to the file
 
 Open the HTML file in any browser to review and classify each entry. Decisions are saved to a `decisions.json` sidecar file which is ingested on the next pipeline run.
-
----
 
 ## Running Tests
 
@@ -242,8 +243,6 @@ open htmlcov/index.html
 ```
 
 All tests are fully offline — no MotherDuck connection required.
-
----
 
 ## Database Tables
 
@@ -259,21 +258,17 @@ All tables live in `my_db.product_normalization.*`.
 | `exact_mapping` | Known raw text → canonical product mappings |
 | `custom_rules` | Active regex rules with priority ordering |
 
----
-
 ## Environment Variables
 
 See `.env.example` for all available configuration options.
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `MOTHERDUCK_TOKEN` | ✅ | — | MotherDuck authentication token |
-| `FUZZY_THRESHOLD` | | `72` | Minimum fuzzy match score (0–100) |
-| `WRITE_DB` | | `my_db` | Writable MotherDuck database |
-| `GDRIVE_FOLDER_ID` | | — | Google Drive export folder |
-| `LOG_LEVEL` | | `INFO` | `DEBUG` \| `INFO` \| `WARNING` \| `ERROR` |
-
----
+| `MOTHERDUCK_TOKEN` | yes | — | MotherDuck authentication token |
+| `FUZZY_THRESHOLD` | no | `72` | Minimum fuzzy match score (0–100) |
+| `WRITE_DB` | no | `my_db` | Writable MotherDuck database |
+| `GDRIVE_FOLDER_ID` | no | — | Google Drive export folder |
+| `LOG_LEVEL` | no | `INFO` | `DEBUG` / `INFO` / `WARNING` / `ERROR` |
 
 ## License
 
